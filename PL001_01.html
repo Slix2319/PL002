@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>iGP TS_001</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background-color: #f8f9fa; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        select, input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        h2 { color: #d40000; border-bottom: 2px solid #d40000; padding-bottom: 8px; margin-top: 0; }
+        .race-header { font-size: 26px; font-weight: bold; margin-bottom: 12px; color: #333; }
+        .progress-bar { height: 22px; background-color: #e9ecef; border-radius: 10px; margin: 8px 0; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; color: white; font-weight: bold; font-size: 12px; }
+        .tyre-icon { font-size: 22px; margin-right: 8px; vertical-align: middle; }
+        .track-map { width: 100%; height: 220px; background-size: contain; background-position: center; background-repeat: no-repeat; margin: 12px 0; border: 1px solid #eee; border-radius: 8px; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .highlight { font-weight: bold; color: #d40000; font-size: 18px; }
+        .weather-icon { font-size: 26px; }
+        .small-text { font-size: 12px; color: #6c757d; margin-top: 4px; }
+        .setup-value { font-size: 20px; font-weight: bold; color: #212529; margin: 5px 0; }
+        .param-details { background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <h1 style="color: #d40000; text-align: center;">iGP TS_001</h1>
+    
+    <div class="grid-2col">
+        <div class="card">
+            <h2>Setup Gara</h2>
+            <div class="grid-2col">
+                <div>
+                    <label>Pista:</label>
+                    <select id="pista"></select>
+                </div>
+                <div>
+                    <label>Altezza Pilota:</label>
+                    <select id="altezzaPilota">
+                        <option value="0">162-169 cm</option>
+                        <option value="0">170-174 cm</option>
+                        <option value="-2">175-179 cm</option>
+                        <option value="-4">180-184 cm</option>
+                        <option value="-6">185-189 cm</option>
+                        <option value="-8" selected>190-192 cm</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Condizioni</h2>
+            <div class="grid-2col">
+                <div>
+                    <label>Meteo:</label>
+                    <select id="meteo">
+                        <option value="0,0">🌞 Sole</option>
+                        <option value="10,10">🌦️ Pioggia lieve</option>
+                        <option value="25,25">🌧️ Pioggia media</option>
+                        <option value="50,50">⛈️ Pioggia intensa</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Temperatura (°C):</label>
+                    <input type="number" id="temperatura" min="5" max="40" value="20">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Race Info</h2>
+            <div class="race-header" id="race-header"></div>
+            <div id="luogo" style="font-weight: 500;"></div>
+            <div style="margin: 10px 0;">Weather Link: <a id="weather-link" target="_blank" style="color: #0d6efd; text-decoration: none;">openweathermap.org</a></div>
+            
+            <div class="track-map" id="track-map"></div>
+            
+            <h3>Caratteristiche circuito</h3>
+            <div id="circuit-details">
+                <div style="margin-bottom: 12px;"><span class="highlight">PIT STOP:</span> <span id="pit-time" style="font-weight: bold;"></span></div>
+                <div>Probabilità Sorpasso: <div class="progress-bar"><div class="progress-fill" id="sorpasso-bar" style="background-color: #4CAF50;"></div></div></div>
+                <div>Irregolarità fondo: <div class="progress-bar"><div class="progress-fill" id="irregolarita-bar" style="background-color: #FF9800;"></div></div></div>
+                <div>Consumo Carburante: <div class="progress-bar"><div class="progress-fill" id="carburante-bar" style="background-color: #2196F3;"></div></div></div>
+                <div>Consumo Pneumatici: <div class="progress-bar"><div class="progress-fill" id="pneumatici-bar" style="background-color: #9C27B0;"></div></div></div>
+                <div style="margin-top: 12px;">Strategia PIT: <span id="pit-strategy" style="font-weight: 500;"></span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Setup Auto</h2>
+            <div class="grid-2col">
+                <div>
+                    <h3>Sospensioni</h3>
+                    <div class="setup-value" id="sospensioni"></div>
+                    
+                    <h3>Altezza</h3>
+                    <div class="param-details">
+                        <span class="small-text">Base: <span id="altezza-base"></span> + Pilota: <span id="altezza-pilota"></span> + Meteo: <span id="altezza-meteo"></span></span>
+                        <div class="setup-value" id="altezza-finale"></div>
+                    </div>
+                    
+                    <h3>Ala</h3>
+                    <div class="param-details">
+                        <span class="small-text">Base: <span id="ala-base"></span> + Meteo: <span id="ala-meteo"></span></span>
+                        <div class="setup-value" id="ala-finale"></div>
+                    </div>
+                </div>
+                <div>
+                    <h3>PUSH LIMIT</h3>
+                    <div style="margin-bottom: 10px;"><span class="tyre-icon" style="color: red;">🔴</span> SS: <span id="pl-ss" style="font-weight: bold;"></span></div>
+                    <div style="margin-bottom: 10px;"><span class="tyre-icon" style="color: gold;">🟡</span> S: <span id="pl-s" style="font-weight: bold;"></span></div>
+                    <div style="margin-bottom: 10px;"><span class="tyre-icon" style="color: grey;">⚪</span> M: <span id="pl-m" style="font-weight: bold;"></span></div>
+                    <div><span class="tyre-icon" style="color: orange;">🟠</span> H: <span id="pl-h" style="font-weight: bold;"></span></div>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 15px;">SKILL</h3>
+            <div id="skill" style="font-weight: 500;"></div>
+            
+            <h3 style="margin-top: 15px;">NOTE</h3>
+            <div id="note" style="background: #f8f9fa; padding: 10px; border-radius: 8px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Database completo con tutte le 24 piste
+        const circuiti = {
+            "AE": { nome: "Abu Dhabi", flag: "🇦🇪", luogo: "Yas Marina Circuit", sospensioni: "Neutre", altezza: 25, ala: 5, pit: 23.3,
+                   p100: 50, p75: 37, p50: 25, p25: 12, velocitaMedia: 213.218, kmGiro: 5.410,
+                   sorpasso: 80, irregolarita: 56, carburante: 40, pneumatici: 50, pitStrategy: "Ritardo", skill: "2-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/ae.png",
+                   meteoLink: "https://openweathermap.org/city/292968", note: "Anticipare il pit stop può essere vantaggioso" },
+            
+            "AU": { nome: "Australia", flag: "🇦🇺", luogo: "Albert Park Circuit", sospensioni: "Neutre", altezza: 38, ala: 15, pit: 24.5,
+                   p100: 57, p75: 42, p50: 28, p25: 14, velocitaMedia: 226.109, kmGiro: 5.301,
+                   sorpasso: 40, irregolarita: 80, carburante: 50, pneumatici: 40, pitStrategy: "Anticipo", skill: "1-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/au.png",
+                   meteoLink: "https://openweathermap.org/city/8015209", note: "Meglio undercut anticipando pit" },
+            
+            "AT": { nome: "Austria", flag: "🇦🇹", luogo: "Red Bull Ring", sospensioni: "Rigide", altezza: 18, ala: 0, pit: 26.8,
+                   p100: 68, p75: 51, p50: 34, p25: 17, velocitaMedia: 228.546, kmGiro: 4.044,
+                   sorpasso: 50, irregolarita: 40, carburante: 70, pneumatici: 60, pitStrategy: "Ritardo", skill: "1-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/at.png",
+                   meteoLink: "https://openweathermap.org/city/2773887", note: "" },
+            
+            "AZ": { nome: "Azerbaijan", flag: "🇦🇿", luogo: "Baku City Circuit", sospensioni: "Neutre", altezza: 33, ala: 5, pit: 17.0,
+                   p100: 46, p75: 34, p50: 23, p25: 11, velocitaMedia: 220.409, kmGiro: 6.049,
+                   sorpasso: 90, irregolarita: 70, carburante: 60, pneumatici: 45, pitStrategy: "Ritardo", skill: "1-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/az.png",
+                   meteoLink: "https://openweathermap.org/city/587084", note: "Anticipare il pit specie se sei davanti" },
+            
+            "BH": { nome: "Bahrain", flag: "🇧🇭", luogo: "Bahrain International Circuit", sospensioni: "Rigide", altezza: 15, ala: 0, pit: 23.0,
+                   p100: 59, p75: 44, p50: 29, p25: 14, velocitaMedia: 184.933, kmGiro: 4.726,
+                   sorpasso: 45, irregolarita: 35, carburante: 90, pneumatici: 60, pitStrategy: "Anticipo", skill: "2-1",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/bh.png",
+                   meteoLink: "https://openweathermap.org/city/290291", note: "La maneggevolezza fa la differenza" },
+            
+            "BE": { nome: "Belgio", flag: "🇧🇪", luogo: "Spa-Francorchamps", sospensioni: "Neutre", altezza: 23, ala: 12, pit: 15.5,
+                   p100: 43, p75: 32, p50: 21, p25: 10, velocitaMedia: 217.7, kmGiro: 7.041,
+                   sorpasso: 50, irregolarita: 50, carburante: 70, pneumatici: 60, pitStrategy: "Anticipo", skill: "1-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/be.png",
+                   meteoLink: "https://openweathermap.org/city/2784821", note: "La maneggevolezza fa la differenza qui" },
+            
+            "BR": { nome: "Brasile", flag: "🇧🇷", luogo: "Interlagos", sospensioni: "Neutre", altezza: 15, ala: 10, pit: 21.4,
+                   p100: 69, p75: 51, p50: 34, p25: 17, velocitaMedia: 203.932, kmGiro: 3.971,
+                   sorpasso: 50, irregolarita: 35, carburante: 56, pneumatici: 60, pitStrategy: "Anticipo", skill: "1-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/br.png",
+                   meteoLink: "https://openweathermap.org/city/3448439", note: "Meglio anticipare pit" },
+            
+            "CA": { nome: "Canada", flag: "🇨🇦", luogo: "Gilles Villeneuve", sospensioni: "Rigide", altezza: 18, ala: -5, pit: 17.0,
+                   p100: 63, p75: 47, p50: 31, p25: 15, velocitaMedia: 221.357, kmGiro: 4.341,
+                   sorpasso: 70, irregolarita: 40, carburante: 80, pneumatici: 45, pitStrategy: "Ritardo", skill: "2-1",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/ca.png",
+                   meteoLink: "https://openweathermap.org/city/6077243", note: "" },
+            
+            "CN": { nome: "Cina", flag: "🇨🇳", luogo: "Shanghai", sospensioni: "Neutre", altezza: 10, ala: 10, pit: 26.0,
+                   p100: 55, p75: 41, p50: 27, p25: 13, velocitaMedia: 207.975, kmGiro: 5.442,
+                   sorpasso: 50, irregolarita: 25, carburante: 90, pneumatici: 80, pitStrategy: "Ritardo", skill: "2-1",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/cn.png",
+                   meteoLink: "https://openweathermap.org/city/1787960", note: "" },
+            
+            "EU": { nome: "Europa", flag: "🇪🇺", luogo: "Valencia", sospensioni: "Morbide", altezza: 23, ala: 20, pit: 16.8,
+                   p100: 50, p75: 37, p50: 25, p25: 12, velocitaMedia: 199.050, kmGiro: 5.590,
+                   sorpasso: 40, irregolarita: 50, carburante: 50, pneumatici: 45, pitStrategy: "Anticipo", skill: "1-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/eu.png",
+                   meteoLink: "https://openweathermap.org/city/6362115", note: "" },
+            
+            "FR": { nome: "Francia", flag: "🇫🇷", luogo: "Paul Ricard", sospensioni: "Neutre", altezza: 33, ala: 10, pit: 20.2,
+                   p100: 48, p75: 36, p50: 24, p25: 12, velocitaMedia: 215.159, kmGiro: 5.881,
+                   sorpasso: 50, irregolarita: 70, carburante: 70, pneumatici: 80, pitStrategy: "Ritardo", skill: "3-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/fr.png",
+                   meteoLink: "https://openweathermap.org/city/3004838", note: "Favorire gomme morbide a temperature fredde" },
+            
+            "DE": { nome: "Germania", flag: "🇩🇪", luogo: "Hockenheimring", sospensioni: "Neutre", altezza: 15, ala: 10, pit: 17.2,
+                   p100: 67, p75: 50, p50: 33, p25: 16, velocitaMedia: 230.552, kmGiro: 4.179,
+                   sorpasso: 50, irregolarita: 35, carburante: 25, pneumatici: 50, pitStrategy: "Ritardo", skill: "4-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/gb.png",
+                   meteoLink: "https://openweathermap.org/city/2902852", note: "" },
+            
+            "JP": { nome: "Giappone", flag: "🇯🇵", luogo: "Suzuka", sospensioni: "Morbide", altezza: 23, ala: 20, pit: 20.2,
+                   p100: 55, p75: 41, p50: 27, p25: 13, velocitaMedia: 215.227, kmGiro: 5.058,
+                   sorpasso: 60, irregolarita: 50, carburante: 45, pneumatici: 70, pitStrategy: "Anticipo", skill: "3-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/de.png",
+                   meteoLink: "https://openweathermap.org/city/1851348", note: "" },
+            
+            "GB": { nome: "Gran Bretagna", flag: "🇬🇧", luogo: "Silverstone", sospensioni: "Rigide", altezza: 18, ala: 0, pit: 23.0,
+                   p100: 48, p75: 36, p50: 24, p25: 12, velocitaMedia: 165.043, kmGiro: 5.751,
+                   sorpasso: 60, irregolarita: 40, carburante: 80, pneumatici: 65, pitStrategy: "Anticipo", skill: "1-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/jp.png",
+                   meteoLink: "https://openweathermap.org/city/2637827", note: "" },
+            
+            "IT": { nome: "Italia", flag: "🇮🇹", luogo: "Monza", sospensioni: "Rigide", altezza: 23, ala: -10, pit: 24.5,
+                   p100: 51, p75: 38, p50: 25, p25: 12, velocitaMedia: 263.107, kmGiro: 5.401,
+                   sorpasso: 90, irregolarita: 50, carburante: 90, pneumatici: 35, pitStrategy: "Anticipo", skill: "1-2",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/it.png",
+                   meteoLink: "https://openweathermap.org/city/3182066", note: "Meglio posticipare il pit" },
+            
+            "MY": { nome: "Malesia", flag: "🇲🇾", luogo: "Sepang", sospensioni: "Neutre", altezza: 23, ala: 5, pit: 22.0,
+                   p100: 55, p75: 41, p50: 27, p25: 13, velocitaMedia: 197.065, kmGiro: 5.536,
+                   sorpasso: 56, irregolarita: 50, carburante: 60, pneumatici: 80, pitStrategy: "Anticipo", skill: "1-4-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/my.png",
+                   meteoLink: "https://openweathermap.org/city/1734814", note: "In caso di pioggia considerare una sosta in meno" },
+            
+            "MX": { nome: "Messico", flag: "🇲🇽", luogo: "Hermanos Rodríguez", sospensioni: "Neutre", altezza: 13, ala: 10, pit: 19.4,
+                   p100: 70, p75: 52, p50: 35, p25: 17, velocitaMedia: 208.879, kmGiro: 4.308,
+                   sorpasso: 70, irregolarita: 30, carburante: 60, pneumatici: 60, pitStrategy: "Ritardo", skill: "2-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/mx.png",
+                   meteoLink: "https://openweathermap.org/city/3530596", note: "" },
+            
+            "MC": { nome: "Monaco", flag: "🇲🇨", luogo: "Monte Carlo", sospensioni: "Morbide", altezza: 43, ala: 35, pit: 15.6,
+                   p100: 59, p75: 44, p50: 29, p25: 14, velocitaMedia: 172.32, kmGiro: 4.015,
+                   sorpasso: 10, irregolarita: 90, carburante: 40, pneumatici: 20, pitStrategy: "Anticipo", skill: "2-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/mc.png",
+                   meteoLink: "https://openweathermap.org/city/3319177", note: "" },
+            
+            "RU": { nome: "Russia", flag: "🇷🇺", luogo: "Sochi", sospensioni: "Neutre", altezza: 8, ala: 10, pit: 21.7,
+                   p100: 46, p75: 34, p50: 23, p25: 11, velocitaMedia: 187.0, kmGiro: 6.077,
+                   sorpasso: 70, irregolarita: 20, carburante: 70, pneumatici: 50, pitStrategy: "Ritardo", skill: "2-1",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/ru.png",
+                   meteoLink: "https://openweathermap.org/city/584242", note: "Serve molta maneggevolezza, poco consumo freni" },
+            
+            "SG": { nome: "Singapore", flag: "🇸🇬", luogo: "Marina Bay", sospensioni: "Morbide", altezza: 33, ala: 27, pit: 20.5,
+                   p100: 60, p75: 45, p50: 30, p25: 15, velocitaMedia: 197.092, kmGiro: 5.049,
+                   sorpasso: 40, irregolarita: 70, carburante: 50, pneumatici: 45, pitStrategy: "Anticipo", skill: "2-4",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/sg.png",
+                   meteoLink: "https://openweathermap.org/city/1880251", note: "Fare un pit in meno se possibile" },
+            
+            "ES": { nome: "Spagna", flag: "🇪🇸", luogo: "Catalunya", sospensioni: "Morbide", altezza: 10, ala: 20, pit: 25.0,
+                   p100: 62, p75: 46, p50: 31, p25: 15, velocitaMedia: 187.086, kmGiro: 4.457,
+                   sorpasso: 40, irregolarita: 25, carburante: 70, pneumatici: 85, pitStrategy: "Anticipo", skill: "4-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/es.png",
+                   meteoLink: "https://openweathermap.org/city/3116275", note: "Gomme S fondamentali con clima freddo" },
+            
+            "US": { nome: "USA", flag: "🇺🇸", luogo: "COTA", sospensioni: "Neutre", altezza: 8, ala: 7, pit: 16.2,
+                   p100: 60, p75: 45, p50: 30, p25: 15, velocitaMedia: 189.212, kmGiro: 4.602,
+                   sorpasso: 70, irregolarita: 20, carburante: 70, pneumatici: 65, pitStrategy: "Ritardo", skill: "4-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/us.png",
+                   meteoLink: "https://openweathermap.org/city/4671654", note: "Anticipare PIT sembra la cosa migliore" },
+            
+            "TR": { nome: "Turchia", flag: "🇹🇷", luogo: "Istanbul Park", sospensioni: "Neutre", altezza: 25, ala: 10, pit: 17.5,
+                   p100: 54, p75: 40, p50: 27, p25: 13, velocitaMedia: 196.0, kmGiro: 5.162,
+                   sorpasso: 50, irregolarita: 56, carburante: 50, pneumatici: 90, pitStrategy: "Ritardo", skill: "4-1",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/tr.png",
+                   meteoLink: "https://openweathermap.org/city/741763", note: "Anticipare PIT sembra la cosa migliore" },
+            
+            "HU": { nome: "Ungheria", flag: "🇭🇺", luogo: "Hungaroring", sospensioni: "Morbide", altezza: 20, ala: 25, pit: 17.5,
+                   p100: 79, p75: 59, p50: 39, p25: 19, velocitaMedia: 186.568, kmGiro: 3.498,
+                   sorpasso: 15, irregolarita: 45, carburante: 25, pneumatici: 30, pitStrategy: "Anticipo", skill: "4-3",
+                   maplink: "https://github.com/R0b0To/iGPlus/raw/main/Extension/images/circuits/hu.png",
+                   meteoLink: "https://openweathermap.org/city/3047986", note: "" }
+        };
+
+        // Popola il menu delle piste
+        function popolaMenuPiste() {
+            const select = document.getElementById("pista");
+            select.innerHTML = "";
+            
+            for (const [sigla, dati] of Object.entries(circuiti)) {
+                const option = document.createElement("option");
+                option.value = sigla;
+                option.textContent = `${dati.flag} ${dati.nome}`;
+                select.appendChild(option);
+            }
+        }
+
+        // Calcola il Push Limit (PL)
+        function calcolaPL(velocitaMedia, temperatura) {
+            return (-0.0323 * velocitaMedia + 10.9 - (temperatura/10));
+        }
+
+        // Aggiorna l'interfaccia
+        function aggiornaDati() {
+            const pista = document.getElementById("pista").value;
+            const altezzaPilota = parseInt(document.getElementById("altezzaPilota").value);
+            const [meteoAltezza, meteoAla] = document.getElementById("meteo").value.split(",").map(Number);
+            const temperatura = parseFloat(document.getElementById("temperatura").value);
+            
+            const circuito = circuiti[pista];
+            
+            // Calcoli
+            const altezzaFinale = circuito.altezza + altezzaPilota + meteoAltezza;
+            const alaFinale = circuito.ala + meteoAla;
+            const PL = calcolaPL(circuito.velocitaMedia, temperatura);
+            
+            // Aggiorna interfaccia
+            document.getElementById("race-header").textContent = `${circuito.flag} ${circuito.nome}`;
+            document.getElementById("luogo").textContent = `Luogo: ${circuito.luogo}`;
+            document.getElementById("weather-link").href = circuito.meteoLink;
+            document.getElementById("weather-link").textContent = circuito.meteoLink;
+            document.getElementById("track-map").style.backgroundImage = `url('${circuito.maplink}')`;
+            
+            // Setup Auto
+            document.getElementById("sospensioni").textContent = circuito.sospensioni;
+            document.getElementById("altezza-base").textContent = `${circuito.altezza}mm`;
+            document.getElementById("altezza-pilota").textContent = `${altezzaPilota}mm`;
+            document.getElementById("altezza-meteo").textContent = `${meteoAltezza}mm`;
+            document.getElementById("altezza-finale").textContent = `${altezzaFinale}mm`;
+            
+            document.getElementById("ala-base").textContent = `${circuito.ala}mm`;
+            document.getElementById("ala-meteo").textContent = `${meteoAla}mm`;
+            document.getElementById("ala-finale").textContent = `${alaFinale}mm`;
+            
+            // Circuit details
+            document.getElementById("pit-time").textContent = `${circuito.pit}s`;
+            document.getElementById("pit-strategy").textContent = circuito.pitStrategy;
+            document.getElementById("skill").textContent = circuito.skill;
+            document.getElementById("note").textContent = circuito.note;
+            
+            // Barre di progresso
+            document.getElementById("sorpasso-bar").style.width = `${circuito.sorpasso}%`;
+            document.getElementById("sorpasso-bar").textContent = `${circuito.sorpasso}%`;
+            document.getElementById("irregolarita-bar").style.width = `${circuito.irregolarita}%`;
+            document.getElementById("irregolarita-bar").textContent = `${circuito.irregolarita}%`;
+            document.getElementById("carburante-bar").style.width = `${circuito.carburante}%`;
+            document.getElementById("carburante-bar").textContent = `${circuito.carburante}%`;
+            document.getElementById("pneumatici-bar").style.width = `${circuito.pneumatici}%`;
+            document.getElementById("pneumatici-bar").textContent = `${circuito.pneumatici}%`;
+            
+            // Push Limit
+            document.getElementById("pl-ss").textContent = (PL - 1).toFixed(2);
+            document.getElementById("pl-s").textContent = PL.toFixed(2);
+            document.getElementById("pl-m").textContent = (PL + 1).toFixed(2);
+            document.getElementById("pl-h").textContent = (PL + 2).toFixed(2);
+        }
+
+        // Event listeners
+        document.getElementById("pista").addEventListener("change", aggiornaDati);
+        document.getElementById("altezzaPilota").addEventListener("change", aggiornaDati);
+        document.getElementById("meteo").addEventListener("change", aggiornaDati);
+        document.getElementById("temperatura").addEventListener("input", aggiornaDati);
+
+        // Inizializzazione
+        window.onload = function() {
+            popolaMenuPiste();
+            aggiornaDati();
+        };
+    </script>
+</body>
+</html>
